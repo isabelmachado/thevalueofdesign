@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Indisputable Value of Design - Interactive Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices:
+        - Hero: Quote & intro to set the stage. Goal: Inform, Engage.
+        - What is Design: Textual summary. Goal: Inform.
+        - ROI: Bar chart for MDI/DMI, clickable stat cards for Forrester/QED. Table for financial summary. Goal: Compare, Inform, Interact. Viz: Chart.js, HTML Table. Interaction: Click to reveal details on stat cards. Justification: Visualizing comparative data and providing layered information for key metrics enhances understanding of financial impact.
+        - UX Advantage: Stat callouts, text blocks for UCD/Accessibility, table for UX numbers. Goal: Inform, Highlight. Viz: HTML Table, Styled Divs. Interaction: None, direct presentation. Justification: Key UX stats are impactful as direct callouts.
+        - Growth Engine: Clickable cards for company case studies (Apple, Airbnb etc.). Goal: Showcase, Inform, Interact. Viz: Styled Divs (cards). Interaction: Click to reveal strategy/impact details. Justification: Case studies are best presented individually with option to explore.
+        - The Risks: Clickable cards for failure examples (Citibank, Ford Pinto etc.), quote, table for costs. Goal: Warn, Inform, Interact. Viz: Styled Divs (cards), HTML Table. Interaction: Click to reveal details. Justification: Similar to positive case studies, specific examples of failure are impactful.
+        - Take Action: Bullet points for McKinsey's 4 areas, final quote. Goal: Conclude, Action. Viz: Styled Lists.
+        - Footer CTA: Image, catchy phrase, and link to LinkedIn. Goal: Engage, Convert.
+        - Library/Method: Chart.js for charts, Vanilla JS for click interactions and navigation. Tailwind for all styling.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'DM Sans', sans-serif; background-color: #FFFBEB; color: #1F2937; }
+        .nav-link { transition: color 0.3s ease; }
+        .nav-link.active, .nav-link:hover { color: #F97316; }
+        .section-title { color: #F97316; }
+        .card { background-color: #FFFFFF; border: 1px solid #FED7AA; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+        .stat-card { background-color: #FB923C; color: white; }
+        .stat-card:hover { background-color: #F97316; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6); }
+        .modal-content { background-color: #FFFFFF; margin: 10% auto; padding: 2rem; border-radius: 0.5rem; max-width: 500px; width: 90%; position: relative; }
+        .modal-close { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; font-weight: bold; cursor: pointer; color: #1F2937 }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #FED7AA; }
+        th { background-color: #FB923C; color: white; }
+        tr:nth-child(even) { background-color: #FFF3E0; } /* Lighter orange for even rows */
+        .tab-button { background-color: #FED7AA; color: #1F2937; padding: 0.5rem 1rem; border-radius: 0.375rem 0.375rem 0 0; margin-right: 0.25rem; cursor: pointer; font-weight: 500;}
+        .tab-button.active { background-color: #F97316; color: white; }
+        .tab-content { display: none; padding: 1rem; border: 1px solid #F97316; border-top: none; border-radius: 0 0 0.375rem 0.375rem;}
+        .tab-content.active { display: block; }
+        .text-main-content { color: #1F2937; } /* For general text content */
+        .text-accent-quote { color: #FB923C; } /* For blockquotes text */
+        .border-accent-quote { border-color: #FB923C; } /* For blockquotes border */
+        .bg-primary-cta { background-color: #F97316; }
+        .hover-bg-primary-cta:hover { background-color: #EA580C; } /* Darker orange for hover */
+        .bg-secondary-elements { background-color: #FDBA74; } /* For elements like stat callout cards */
+        .text-footer { color: #FFFBEB; }
+        .bg-footer { background-color: #1F2937; }
+        .link-footer { color: #FDBA74; }
+        .hover-link-footer:hover { color: #FFFBEB; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav class="bg-[#FFFBEB]/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-[#F97316]">Design's Value</span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                        <a href="#what-is-design" class="nav-link px-3 py-2 rounded-md text-sm font-medium">What is Design?</a>
+                        <a href="#roi" class="nav-link px-3 py-2 rounded-md text-sm font-medium">The ROI</a>
+                        <a href="#ux-advantage" class="nav-link px-3 py-2 rounded-md text-sm font-medium">UX Advantage</a>
+                        <a href="#growth-engine" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Growth Engine</a>
+                        <a href="#the-risks" class="nav-link px-3 py-2 rounded-md text-sm font-medium">The Risks</a>
+                        <a href="#take-action" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Take Action</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-[#1F2937] hover:text-[#F97316] focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Home</a>
+                <a href="#what-is-design" class="nav-link block px-3 py-2 rounded-md text-base font-medium">What is Design?</a>
+                <a href="#roi" class="nav-link block px-3 py-2 rounded-md text-base font-medium">The ROI</a>
+                <a href="#ux-advantage" class="nav-link block px-3 py-2 rounded-md text-base font-medium">UX Advantage</a>
+                <a href="#growth-engine" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Growth Engine</a>
+                <a href="#the-risks" class="nav-link block px-3 py-2 rounded-md text-base font-medium">The Risks</a>
+                <a href="#take-action" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Take Action</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <section id="home" class="min-h-[calc(100vh-4rem)] flex flex-col justify-center items-center text-center py-16">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-main-content">The <span class="section-title">Indisputable Value</span> of Design</h1>
+            <p class="text-xl sm:text-2xl text-main-content mb-8 max-w-3xl">Powering Innovation, User Delight, and Tangible Business Success.</p>
+            <blockquote class="text-lg sm:text-xl italic text-accent-quote border-l-4 border-accent-quote pl-4 py-2 mb-12">
+                "Design is not just what it looks like and feels like. Design is how it works."
+                <footer class="mt-2 text-sm not-italic text-main-content">- Steve Jobs</footer>
+            </blockquote>
+            <p class="text-base md:text-lg text-main-content max-w-2xl">
+                Welcome! This interactive experience explores the multifaceted value of design, moving beyond aesthetics to its core role in business strategy, user satisfaction, and financial outcomes. Discover how strategic design can be a powerful lever for growth and a critical mitigator of risk.
+            </p>
+             <a href="#what-is-design" class="mt-10 inline-block bg-primary-cta text-white font-semibold py-3 px-8 rounded-lg shadow-md hover-bg-primary-cta transition duration-300">Explore the Report</a>
+        </section>
+
+        <section id="what-is-design" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">What is Design, <span class="text-main-content">Really?</span></h2>
+             <p class="text-lg text-center text-main-content mb-10 max-w-3xl mx-auto">This section defines design beyond simple aesthetics, highlighting its function as an intentional, strategic problem-solving discipline crucial for modern business success. It's about how things work and resonate with users, bridging creativity and pragmatic solutions.</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-main-content">Beyond Aesthetics</h3>
+                    <p class="mb-4 text-main-content">Design is the intentional act of planning and creating solutions that are not only visually appealing but are also functional and meaningful. It's the plan to make things work better, balancing utility with emotion. Modern design is a cross-functional discipline, vital for innovation across industries like IT, healthcare, and business.</p>
+                    <h3 class="text-2xl font-semibold mb-3 text-main-content">The Modern Business Imperative</h3>
+                    <p class="text-main-content">Once an afterthought, design is now an indispensable strategic asset. In a crowded marketplace, effective design differentiates, attracts and retains customers, and fosters brand loyalty. It shapes efficient internal processes and a culture of innovation. Proactive, data-driven design, integral from an idea's inception, reduces costly revisions and improves product-market fit.</p>
+                </div>
+                <div class="flex justify-center items-center p-6">
+                    <div class="w-64 h-64 bg-[#FB923C] rounded-full flex items-center justify-center text-white text-center p-4 shadow-xl">
+                        <p class="text-lg font-semibold">Design: <br/>Intention + Function + Emotion = Value</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roi" class="py-16 scroll-mt-16 bg-[#FFF3E0] rounded-lg">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">The Measurable <span class="text-main-content">ROI of Design</span></h2>
+            <p class="text-lg text-center text-main-content mb-12 max-w-3xl mx-auto">Explore the tangible financial returns of strategic design investment. Robust studies and real-world examples consistently show that companies prioritizing design outperform their peers and achieve significant economic benefits.</p>
+            
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-6 text-center text-main-content">Design-Driven Companies Outperform</h3>
+                <div class="chart-container">
+                    <canvas id="roiChart"></canvas>
+                </div>
+                <p class="text-sm text-center mt-4 text-main-content">Data from McKinsey Design Index (MDI) and DMI Design Value Index shows superior revenue growth, shareholder returns, and market performance for design-led companies.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <div class="card p-6 cursor-pointer stat-card" onclick="showModal('forresterModal')">
+                    <h4 class="text-xl font-bold mb-2">Forrester TEI™ (Design Thinking)</h4>
+                    <p>Median Project ROI: <span class="text-2xl font-bold">229%</span></p>
+                    <p>Organizational ROI: <span class="text-xl font-bold">71%-107%</span></p>
+                </div>
+                <div class="card p-6 cursor-pointer stat-card" onclick="showModal('aprioriModal')">
+                    <h4 class="text-xl font-bold mb-2">Forrester TEI™ (aPriori Example)</h4>
+                    <p>ROI: <span class="text-2xl font-bold">603%</span>, NPV: <span class="text-xl font-bold">$19.7M</span></p>
+                    <p>Design Efficiency: <span class="text-xl font-bold">Up to +70%</span></p>
+                </div>
+                <div class="card p-6 cursor-pointer stat-card" onclick="showModal('qedBankModal')">
+                    <h4 class="text-xl font-bold mb-2">McKinsey QED (Bank)</h4>
+                    <p>Annual Spend Lift: <span class="text-2xl font-bold">$2.3B</span></p>
+                    <p>CSAT Increase: <span class="text-xl font-bold">+28pp</span></p>
+                </div>
+                <div class="card p-6 cursor-pointer stat-card" onclick="showModal('qedUtilityModal')">
+                    <h4 class="text-xl font-bold mb-2">McKinsey QED (Utility)</h4>
+                    <p>Cost Reduction: <span class="text-2xl font-bold">35%</span></p>
+                    <p>CSAT Increase: <span class="text-xl font-bold">+8 pts</span></p>
+                </div>
+                <div class="card p-6 cursor-pointer stat-card" onclick="showModal('qedPharmaModal')">
+                    <h4 class="text-xl font-bold mb-2">McKinsey QED (Pharma)</h4>
+                    <p>Annual Revenue Inc.: <span class="text-2xl font-bold">$10M</span></p>
+                    <p>(from 1% patient adherence lift)</p>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold mb-6 text-center text-main-content">Financial Impact Summary</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr>
+                            <th>Metric Source & Focus</th>
+                            <th>Key Financial Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="financialImpactTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="ux-advantage" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">Elevating the User <span class="text-main-content">Experience (UX)</span></h2>
+            <p class="text-lg text-center text-main-content mb-12 max-w-3xl mx-auto">Delve into how user-centered design (UCD) and human-centered design (HCD) principles craft superior usability and accessibility. Great UX directly translates to increased customer loyalty, higher conversion rates, and a stronger brand.</p>
+
+            <div class="grid md:grid-cols-2 gap-12 mb-12">
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-main-content">User-Centered & Human-Centered Design</h3>
+                    <p class="mb-4 text-main-content">UCD/HCD places users at the heart of the design process. Key principles: <strong class="text-[#F97316]">Empathy</strong> (deep understanding of user needs), <strong class="text-[#F97316]">Iterative Design</strong> (continuous refinement based on feedback), and <strong class="text-[#F97316]">Solving Real Problems</strong>. Design Thinking (Empathize, Define, Ideate, Prototype, Test) operationalizes these.</p>
+                    <blockquote class="italic text-accent-quote border-l-4 border-accent-quote pl-4 py-2 mb-4">
+                        "The whole point of human-centered design is to tame complexity..."<br/>- Don Norman
+                    </blockquote>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold mb-3 text-main-content">Usability & Accessibility</h3>
+                    <p class="mb-4 text-main-content">Nielsen's 10 Usability Heuristics guide intuitive interface design. Accessibility (WCAG POUR principles: Perceivable, Operable, Understandable, Robust) ensures products work for everyone, improving UX for all and broadening reach.</p>
+                    <p class="text-main-content">Good UI/UX significantly impacts loyalty, retention, and conversions. Intuitive platforms lead to higher engagement and satisfaction.</p>
+                </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="card p-6 bg-secondary-elements text-main-content">
+                    <p class="text-3xl font-bold">Up to +400%</p>
+                    <p>Conversion Rate Boost with Strong UX</p>
+                </div>
+                <div class="card p-6 bg-secondary-elements text-main-content">
+                    <p class="text-3xl font-bold">88%</p>
+                    <p>Users Unlikely to Return After Bad UX</p>
+                </div>
+                <div class="card p-6 bg-secondary-elements text-main-content">
+                    <p class="text-3xl font-bold">70%</p>
+                    <p>Online Businesses Fail Due to Bad Usability</p>
+                </div>
+                <div class="card p-6 bg-secondary-elements text-main-content">
+                    <p class="text-3xl font-bold">86%</p>
+                    <p>Willing to Pay More for Smoother UX</p>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold mb-6 text-center text-main-content">User Experience by the Numbers</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr>
+                            <th>Impact Area</th>
+                            <th>Statistic</th>
+                        </tr>
+                    </thead>
+                    <tbody id="uxNumbersTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="growth-engine" class="py-16 scroll-mt-16 bg-[#FFF3E0] rounded-lg">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">Design as a Strategic <span class="text-main-content">Growth Engine</span></h2>
+            <p class="text-lg text-center text-main-content mb-12 max-w-3xl mx-auto">Discover how leading companies leverage design as a strategic pillar to build indelible brands, foster disruptive innovation, and achieve sustained market leadership. It's about integrating human-centered principles with overarching business strategy.</p>
+            
+            <div class="mb-12">
+                <h3 class="text-2xl font-semibold mb-3 text-main-content">Building Brands & Trust</h3>
+                <p class="mb-4 text-main-content">Visual design (logos, colors) creates first impressions and shapes brand identity. Consistency aids recognition (brand colors +80% recognition). Positive brand perception builds trust, and <strong class="text-[#F97316]">87% of shoppers will pay more for a trusted brand.</strong></p>
+            
+                <h3 class="text-2xl font-semibold mb-3 mt-6 text-main-content">Forging Competitive Advantage & Innovation</h3>
+                <p class="text-main-content">Design Thinking drives innovation by redefining problems and prioritizing user needs. Strategic Design aligns these efforts with business objectives (profitability, scalability), bridging departments and fostering collaboration.</p>
+            </div>
+
+            <h3 class="text-2xl font-semibold mb-8 text-center text-main-content">Case Studies: Design-Led Success</h3>
+            <div id="caseStudiesContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            </div>
+        </section>
+
+        <section id="the-risks" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">The High Cost of <span class="text-main-content">Poor Design</span></h2>
+            <p class="text-lg text-center text-main-content mb-12 max-w-3xl mx-auto">Understand the significant, multifaceted risks of neglecting design. These range from direct financial losses and eroded brand trust to critical safety failures and market irrelevance. The cost of bad design often far outweighs the investment in good design.</p>
+
+            <blockquote class="text-lg sm:text-xl italic text-red-600 border-l-4 border-red-500 pl-4 py-2 mb-12 max-w-2xl mx-auto text-center">
+                "If you think good design is expensive, you should look at the cost of bad design."
+                <footer class="mt-2 text-sm not-italic text-main-content">- Ralf Speth, former CEO Jaguar Land Rover</footer>
+            </blockquote>
+
+            <div class="mb-12">
+                 <div class="flex mb-4 border-b border-[#FED7AA]">
+                    <button class="tab-button active" onclick="openTab(event, 'financialLossTab')">Financial & Brand</button>
+                    <button class="tab-button" onclick="openTab(event, 'userImpactTab')">User Impact</button>
+                    <button class="tab-button" onclick="openTab(event, 'safetyMarketTab')">Safety & Market</button>
+                </div>
+
+                <div id="financialLossTab" class="tab-content active">
+                    <h4 class="text-xl font-semibold mb-3 text-[#F97316]">Detrimental Business Outcomes</h4>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- 35% Missed Sales:</strong> Due to bad UX.</p>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Billions Lost:</strong> Annually from slow sites & frustrating UI.</p>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Citibank's $500M Error:</strong> Flawed UX led to accidental $900M transfer.</p>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Apple Maps Launch:</strong> Est. $30B in brand damage & rectification costs.</p>
+                    <p class="text-main-content"><strong class="text-red-600">- Logo Redesigns (Nokia, X/Twitter):</strong> User confusion, negative brand perception.</p>
+                </div>
+                <div id="userImpactTab" class="tab-content">
+                    <h4 class="text-xl font-semibold mb-3 text-[#F97316]">The User Toll: Frustration & Abandonment</h4>
+                     <p class="mb-1 text-main-content"><strong class="text-red-600">- 88% Unlikely to Return:</strong> After one bad UX.</p>
+                     <p class="mb-1 text-main-content"><strong class="text-red-600">- Snapchat 2018 Redesign:</strong> Massive user backlash due to confusing UI.</p>
+                     <p class="mb-1 text-main-content"><strong class="text-red-600">- Airbnb's Hidden Costs:</strong> User frustration over lack of price transparency.</p>
+                     <p class="text-main-content"><strong class="text-red-600">- Adobe's "Dark Patterns":</strong> Difficult subscription cancellation processes.</p>
+                </div>
+                 <div id="safetyMarketTab" class="tab-content">
+                    <h4 class="text-xl font-semibold mb-3 text-[#F97316]">Safety, Ethics & Market Irrelevance</h4>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Ford Pinto:</strong> Fuel tank flaw, >27 deaths, 1.5M vehicles recalled.</p>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Samsung Note 7:</strong> Battery explosions, $5B+ loss, global recall.</p>
+                    <p class="mb-1 text-main-content"><strong class="text-red-600">- Ikea Malm Dresser:</strong> Tip-over risk, child deaths, extensive recalls.</p>
+                    <p class="text-main-content"><strong class="text-red-600">- Market Stagnation:</strong> Failure to adapt design to market shifts leads to irrelevance and lost competitive advantage.</p>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold mb-6 text-center text-main-content">Compounding Costs of Neglected Design</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white shadow-md rounded-lg">
+                    <thead>
+                        <tr>
+                            <th>Area of Impact</th>
+                            <th>Example/Statistic</th>
+                        </tr>
+                    </thead>
+                    <tbody id="neglectedDesignTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="take-action" class="py-16 scroll-mt-16 bg-[#FFF3E0] rounded-lg">
+            <h2 class="text-3xl font-bold section-title mb-4 text-center">Take Action: Embed <span class="text-main-content">Design in Your DNA</span></h2>
+            <p class="text-lg text-center text-main-content mb-12 max-w-3xl mx-auto">The evidence is clear: design is an indispensable driver of value. Transition from viewing design as a cost to embracing it as a core strategic investment. This means integrating design thinking across all facets of your organization.</p>
+
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-semibold text-[#F97316] mb-6">Cultivating Analytical Leadership in Design (McKinsey)</h3>
+                <ul class="space-y-4 text-main-content">
+                    <li class="flex items-start">
+                        <span class="text-[#F97316] font-bold mr-3 text-2xl">1.</span>
+                        <span><strong class="text-main-content">Measure & Drive Performance:</strong> Apply the same rigor to design metrics as to revenues and costs.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#F97316] font-bold mr-3 text-2xl">2.</span>
+                        <span><strong class="text-main-content">Break Down Internal Walls:</strong> Integrate physical, digital, and service design for holistic user experiences.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#F97316] font-bold mr-3 text-2xl">3.</span>
+                        <span><strong class="text-main-content">Make User-Centricity Everyone's Job:</strong> Foster a shared understanding of user needs across all functions.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-[#F97316] font-bold mr-3 text-2xl">4.</span>
+                        <span><strong class="text-main-content">De-Risk Development:</strong> Continuously listen, test, and iterate with end-users throughout the design process.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <blockquote class="mt-12 text-lg italic text-accent-quote border-l-4 border-accent-quote pl-4 py-2 max-w-3xl mx-auto text-center">
+                "Design thinking is a human-centered approach to innovation that draws from the designer's toolkit to integrate the needs of people, the possibilities of technology, and the requirements for business success."
+                <footer class="mt-2 text-sm not-italic text-main-content">- Tim Brown, Executive Chair of IDEO</footer>
+            </blockquote>
+            <p class="text-center mt-8 text-main-content">By embedding design into its strategic DNA, your organization equips itself to thrive.</p>
+        </section>
+    </main>
+
+    <section id="cta-footer" class="py-16 bg-[#FFF3E0]">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 text-center md:text-left">
+            <img src="https://placehold.co/150x150/FDBA74/1F2937?text=IN" 
+                 alt="Isabel Novais Machado - Design Consultant" 
+                 class="w-32 h-32 md:w-36 md:h-36 rounded-full shadow-xl object-cover border-4 border-white">
+            <div class="max-w-lg">
+                <h3 class="text-2xl md:text-3xl font-bold text-main-content mb-3">
+                    Ready to unlock your business's design potential?
+                </h3>
+                <p class="text-main-content mb-6 text-lg">Let's discuss how strategic design can elevate your brand and drive growth.</p>
+                <a href="https://www.linkedin.com/in/isabelnovais/" target="_blank" rel="noopener noreferrer"
+                   class="inline-block bg-primary-cta text-white font-semibold py-3 px-8 rounded-lg shadow-md hover-bg-primary-cta transition duration-300 text-lg">
+                    Let's talk!
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-footer text-footer py-8 text-center">
+        <p>&copy; <span id="currentYear"></span> Interactive Report on the Value of Design. </p>
+        <p class="mt-1 text-sm">Consultancy services by Isabel Novais.</p>
+        <a href="#home" class="link-footer hover-link-footer underline mt-2 inline-block">Back to Top</a>
+    </footer>
+
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle" class="text-2xl font-bold section-title mb-4"></h3>
+            <p id="modalBody" class="text-main-content"></p>
+        </div>
+    </div>
+
+<script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link'); // All nav links (desktop and mobile)
+    const sections = document.querySelectorAll('main > section[id]'); // Sections in main with an ID
+
+    function changeActiveLink() {
+        const mainSections = Array.from(sections).filter(s => s.id && s.id !== 'cta-footer' && typeof s.offsetTop === 'number');
+        
+        // Clear active class from all nav links first
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        if (!mainSections.length) {
+            // Fallback: if no main sections, try to activate a "home" link
+            const homeLinkDesktop = document.querySelector('nav .nav-link[href="#home"]:not(#mobile-menu .nav-link)');
+            if (homeLinkDesktop) homeLinkDesktop.classList.add('active');
+            const homeLinkMobile = document.querySelector('#mobile-menu .nav-link[href="#home"]');
+            if (homeLinkMobile) homeLinkMobile.classList.add('active');
+            return;
+        }
+
+        let activeMainSectionIndex = 0; // Default to the first section
+        const scrollOffset = window.scrollY + 100; // Threshold from the top of the viewport
+
+        // Find the highest section whose top is at or above the scrollOffset
+        for (let i = mainSections.length - 1; i >= 0; i--) {
+            if (mainSections[i].offsetTop <= scrollOffset) {
+                activeMainSectionIndex = i;
+                break; 
+            }
+        }
+        // If scrolled to the very top, activeMainSectionIndex will be 0 or the first section.
+
+        if (mainSections[activeMainSectionIndex] && mainSections[activeMainSectionIndex].id) {
+            const activeSectionId = mainSections[activeMainSectionIndex].id;
+            
+            // Activate desktop link
+            const desktopLink = document.querySelector(`nav .nav-link[href="#${activeSectionId}"]:not(#mobile-menu .nav-link)`);
+            if (desktopLink) desktopLink.classList.add('active');
+
+            // Activate mobile link
+            const mobileLink = document.querySelector(`#mobile-menu .nav-link[href="#${activeSectionId}"]`);
+            if (mobileLink) mobileLink.classList.add('active');
+        }
+    }
+
+    window.addEventListener('scroll', changeActiveLink);
+    document.addEventListener('DOMContentLoaded', changeActiveLink); 
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            // No e.preventDefault() needed for hash links if scroll-smooth is handled by browser/CSS
+            if (mobileMenu.classList.contains('hidden') === false) {
+                mobileMenu.classList.add('hidden');
+            }
+            // Manually trigger active link update after click for immediate feedback
+            // setTimeout(changeActiveLink, 50); // Small delay to allow scroll to catch up
+        });
+    });
+
+    const roiChartCtx = document.getElementById('roiChart').getContext('2d');
+    const roiChart = new Chart(roiChartCtx, {
+        type: 'bar',
+        data: {
+            labels: ['MDI Top Quartile Revenue Growth vs Peers', 'MDI Top Quartile TRS Growth vs Peers', 'DMI Design Value Index vs S&P 500'],
+            datasets: [{
+                label: 'Outperformance (Percentage Points / %)',
+                data: [32, 56, 219],
+                backgroundColor: [
+                    'rgba(251, 146, 60, 0.7)', // #FB923C
+                    'rgba(253, 186, 116, 0.7)', // #FDBA74
+                    'rgba(254, 215, 170, 0.7)'  // #FED7AA
+                ],
+                borderColor: [
+                    'rgba(249, 115, 22, 1)', // #F97316
+                    'rgba(251, 146, 60, 1)', // #FB923C
+                    'rgba(253, 186, 116, 1)'  // #FDBA74
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Percentage Points / %', color: '#1F2937' },
+                    ticks: { color: '#1F2937' },
+                    grid: { color: '#FED7AA' }
+                },
+                x: {
+                    ticks: {
+                        color: '#1F2937',
+                        callback: function(value, index, values) {
+                            const label = this.getLabelForValue(value);
+                            if (label.length > 20) {
+                                const words = label.split(' ');
+                                const lines = [];
+                                let currentLine = '';
+                                words.forEach(word => {
+                                    if ((currentLine + word).length > 20) {
+                                        lines.push(currentLine.trim());
+                                        currentLine = '';
+                                    }
+                                    currentLine += word + ' ';
+                                });
+                                lines.push(currentLine.trim());
+                                return lines;
+                            }
+                            return label;
+                        }
+                    },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1F2937',
+                    titleColor: '#FFFBEB',
+                    bodyColor: '#FFFBEB',
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.formattedValue}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const modalData = {
+        forresterModal: { title: "Forrester TEI™ (Design Thinking)", body: "Forrester's Total Economic Impact studies show mature design thinking practices yield a median per-project ROI of 229%, with three-quarters of projects more than doubling investment. Organizational ROI ranges from 71% to 107%." },
+        aprioriModal: { title: "Forrester TEI™ (aPriori Example)", body: "A specific study on aPriori's Manufacturing Insights Platform (leveraging design for usability) showed a 603% ROI, $19.7M NPV, 10% procurement spend reduction, and up to 70% increase in design efficiency." },
+        qedBankModal: { title: "McKinsey QED (Bank Example)", body: "A prominent bank redesigned key customer journeys (bill-paying, card replacement, ID verification). This led to a $2.3 billion lift in annual customer spend and a 28-percentage-point increase in customer satisfaction." },
+        qedUtilityModal: { title: "McKinsey QED (Utility Example)", body: "A regional utility re-engineered its payments journey, resulting in a 35% reduction in operational costs and an 8-point boost in customer satisfaction scores." },
+        qedPharmaModal: { title: "McKinsey QED (Pharma Example)", body: "A major pharmaceutical company redesigned the prescription-refill journey. This led to a 1% increase in patient adherence, generating an additional $10 million in annual revenue." }
+    };
+
+    const detailModal = document.getElementById('detailModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    function showModal(modalId) {
+        const data = modalData[modalId];
+        if (data) {
+            modalTitle.textContent = data.title;
+            modalBody.textContent = data.body;
+            detailModal.style.display = 'block';
+        }
+    }
+    function closeModal() {
+        detailModal.style.display = 'none';
+    }
+    window.onclick = function(event) {
+        if (event.target == detailModal) {
+            closeModal();
+        }
+    }
+
+    const financialImpactData = [
+        { source: "McKinsey Design Index (MDI)", impact: "Top-Quartile: +32pp Revenue Growth, +56pp TRS vs. Peers" },
+        { source: "DMI Design Value Index", impact: "Design-led companies outperformed S&P 500 by 219% (10yr, 2014)" },
+        { source: "Forrester TEI (Design Thinking)", impact: "Median Project ROI: 229%; Org ROI: 71%-107%" },
+        { source: "Forrester TEI (aPriori Example)", impact: "ROI: 603%; NPV: $19.7M; Procurement Spend Reduction: 10%" },
+        { source: "McKinsey QED (Bank Example)", impact: "Annual Spend Lift: $2.3B; CSAT: +28pp" },
+        { source: "McKinsey QED (Utility Example)", impact: "Cost Reduction: 35%; CSAT: +8 points" },
+        { source: "McKinsey QED (Pharma Example)", impact: "Annual Revenue Inc.: $10M (from 1% adherence lift)" }
+    ];
+    const financialTableBody = document.getElementById('financialImpactTableBody');
+    financialImpactData.forEach(item => {
+        const row = financialTableBody.insertRow();
+        row.insertCell().textContent = item.source;
+        row.insertCell().textContent = item.impact;
+    });
+
+    const uxNumbersData = [
+        { area: "Conversion Rate Boost (UI)", stat: "Up to +200%" },
+        { area: "Conversion Rate Boost (UX Strategy)", stat: "Up to +400%" },
+        { area: "User Retention (Negative UX)", stat: "88% unlikely to return after bad experience" },
+        { area: "Site Abandonment (Load >3s)", stat: "53% abandon (overall), 40% (specific)" },
+        { area: "Business Failure (Usability)", stat: "70% of online businesses fail due to bad usability" },
+        { area: "Customer Loyalty Impact (1 bad UX)", stat: "32% abandon loved brand (PWC)" },
+        { area: "Willingness to Pay More (Smooth UX)", stat: "86% of online users" },
+        { area: "Accessibility Impact (Hard to navigate)", stat: "71% of users leave" }
+    ];
+    const uxTableBody = document.getElementById('uxNumbersTableBody');
+    uxNumbersData.forEach(item => {
+        const row = uxTableBody.insertRow();
+        row.insertCell().textContent = item.area;
+        row.insertCell().textContent = item.stat;
+    });
+
+    const caseStudiesData = [
+        { company: "Apple", strategy: "Holistic User-Centricity, Seamless Hardware-Software Integration, Iterative Refinement.", impact: "Market Dominance, Iconic Brand, High Customer Loyalty.", icon: "" },
+        { company: "Airbnb", strategy: "Empathy-Driven Problem Solving (e.g., photography), Building Trust via UX, '11-Star Experience'.", impact: "Industry Disruption, Global Growth from Near Failure, Strong Community.", icon: "A" },
+        { company: "IBM", strategy: "Enterprise Design Thinking (Hills, Playbacks, Sponsor Users), User-Focused Client Solutions.", impact: "Scaled Design Across Large Org, Transformed Product Development.", icon: "I" },
+        { company: "Nike", strategy: "Athlete-Focused Innovation, Universal Design Principles (e.g., EasyOn Backpack).", impact: "High-Performance Products, Inclusive Design Benefiting All.", icon: "N" },
+        { company: "Dyson", strategy: "'Form Follows Function,' Relentless R&D Investment, Engineering Excellence.", impact: "Premium Market Positioning, Technological Leadership.", icon: "D" },
+        { company: "GE Healthcare", strategy: "Empathized with pediatric patients for 'Adventure Series' MRI redesign.", impact: "Increased patient satisfaction by 90%, improved scan quality.", icon: "G" }
+    ];
+    const caseStudiesContainer = document.getElementById('caseStudiesContainer');
+    caseStudiesData.forEach(study => {
+        const card = document.createElement('div');
+        card.className = 'card p-6 cursor-pointer';
+        card.innerHTML = `
+            <div class="flex items-center mb-3">
+                <div class="w-10 h-10 bg-[#F97316] text-white rounded-full flex items-center justify-center text-xl font-bold mr-3">${study.icon}</div>
+                <h4 class="text-xl font-bold text-main-content">${study.company}</h4>
+            </div>
+            <p class="text-sm text-main-content mb-2"><strong class="text-[#F97316]">Strategy:</strong> ${study.strategy}</p>
+            <p class="text-sm text-main-content"><strong class="text-[#F97316]">Impact:</strong> ${study.impact}</p>
+        `;
+        card.onclick = () => showModalCustom(study.company, `<p><strong class='text-[#F97316]'>Strategy:</strong> ${study.strategy}</p><p><strong class='text-[#F97316]'>Impact:</strong> ${study.impact}</p>`);
+        caseStudiesContainer.appendChild(card);
+    });
+
+    function showModalCustom(title, bodyHtml) {
+        modalTitle.textContent = title;
+        modalBody.innerHTML = bodyHtml;
+        detailModal.style.display = 'block';
+    }
+    
+    const neglectedDesignData = [
+        { area: "Financial Loss", example: "Citibank $500M error (flawed UX); Businesses miss 35% sales (bad UX)" },
+        { area: "Brand Damage", example: "Nokia/X logo redesigns (user confusion); Adobe 'dark patterns'" },
+        { area: "User Abandonment", example: "88% users unlikely to return (bad UX); Snapchat redesign backlash" },
+        { area: "Safety Incidents", example: "Ford Pinto (>27 deaths); Samsung Note 7 ($5B+ loss); Ikea Malm (child deaths)" },
+        { area: "Missed Market Opps.", example: "Failure to adapt to market shifts; Poor market research leading to product failure" }
+    ];
+    const neglectedTableBody = document.getElementById('neglectedDesignTableBody');
+    neglectedDesignData.forEach(item => {
+        const row = neglectedTableBody.insertRow();
+        row.insertCell().textContent = item.area;
+        row.insertCell().textContent = item.example;
+    });
+
+    function openTab(event, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
+        }
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+        document.getElementById(tabName).style.display = "block";
+        document.getElementById(tabName).classList.add("active");
+        event.currentTarget.classList.add("active");
+    }
+
+</script>
+</body>
+</html>
