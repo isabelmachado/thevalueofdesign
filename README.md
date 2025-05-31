@@ -1,1 +1,1 @@
-A 'one night stand' test powered by Gemini research to explain the business people the value of design.
+A 'one night stand' with Gemini research to explain the value of design to business people.
